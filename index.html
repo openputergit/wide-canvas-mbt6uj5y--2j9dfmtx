@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiffin Service Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background: #0a0a2e;
+            color: #00ff9d;
+        }
+        .neon-border {
+            box-shadow: 0 0 10px #00ff9d, 0 0 20px #00ff9d, 0 0 30px #00ff9d;
+        }
+        .neon-text {
+            text-shadow: 0 0 5px #00ff9d, 0 0 10px #00ff9d;
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold neon-text mb-2">Cyber Tiffin Service</h1>
+            <p class="text-cyan-400">Daily Customer Management System</p>
+        </header>
+
+        <div class="max-w-4xl mx-auto bg-slate-900/80 p-6 rounded-lg neon-border">
+            <form id="customerForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm mb-2">Customer Name</label>
+                        <input type="text" id="customerName" class="w-full bg-slate-800 border border-cyan-500 rounded px-3 py-2 focus:outline-none focus:border-[#00ff9d]" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-2">Phone Number</label>
+                        <input type="tel" id="phoneNumber" class="w-full bg-slate-800 border border-cyan-500 rounded px-3 py-2 focus:outline-none focus:border-[#00ff9d]" required>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm mb-2">Meal Type</label>
+                        <select id="mealType" class="w-full bg-slate-800 border border-cyan-500 rounded px-3 py-2 focus:outline-none focus:border-[#00ff9d]">
+                            <option value="lunch">Lunch</option>
+                            <option value="dinner">Dinner</option>
+                            <option value="both">Both</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-2">Status</label>
+                        <select id="deliveryStatus" class="w-full bg-slate-800 border border-cyan-500 rounded px-3 py-2 focus:outline-none focus:border-[#00ff9d]">
+                            <option value="delivered">Delivered</option>
+                            <option value="not-delivered">Not Delivered</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">
+                    Add Entry
+                </button>
+            </form>
+
+            <div class="mt-8">
+                <h2 class="text-xl font-bold mb-4 neon-text">Today's Records</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-slate-800">
+                                <th class="px-4 py-2">Name</th>
+                                <th class="px-4 py-2">Phone</th>
+                                <th class="px-4 py-2">Meal</th>
+                                <th class="px-4 py-2">Status</th>
+                                <th class="px-4 py-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerList">
+                            <!-- JavaScript will populate this -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-6 grid grid-cols-2 gap-4 text-center">
+                <div class="bg-slate-800 p-4 rounded">
+                    <h3 class="font-bold mb-2">Total Customers</h3>
+                    <p id="totalCustomers" class="text-2xl neon-text">0</p>
+                </div>
+                <div class="bg-slate-800 p-4 rounded">
+                    <h3 class="font-bold mb-2">Delivered</h3>
+                    <p id="deliveredCount" class="text-2xl neon-text">0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let customers = [];
+
+        document.getElementById('customerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const customer = {
+                id: Date.now(),
+                name: document.getElementById('customerName').value,
+                phone: document.getElementById('phoneNumber').value,
+                mealType: document.getElementById('mealType').value,
+                status: document.getElementById('deliveryStatus').value
+            };
+
+            customers.push(customer);
+            updateTable();
+            updateStats();
+            this.reset();
+        });
+
+        function updateTable() {
+            const tbody = document.getElementById('customerList');
+            tbody.innerHTML = '';
+
+            customers.forEach(customer => {
+                const row = document.createElement('tr');
+                row.className = 'border-t border-slate-700';
+                row.innerHTML = `
+                    <td class="px-4 py-2">${customer.name}</td>
+                    <td class="px-4 py-2">${customer.phone}</td>
+                    <td class="px-4 py-2">${customer.mealType}</td>
+                    <td class="px-4 py-2">
+                        <span class="${customer.status === 'delivered' ? 'text-green-400' : 'text-red-400'}">
+                            ${customer.status === 'delivered' ? 'Delivered' : 'Not Delivered'}
+                        </span>
+                    </td>
+                    <td class="px-4 py-2">
+                        <button onclick="deleteCustomer(${customer.id})" class="text-red-500 hover:text-red-700">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('totalCustomers').textContent = customers.length;
+            const deliveredCount = customers.filter(c => c.status === 'delivered').length;
+            document.getElementById('deliveredCount').textContent = deliveredCount;
+        }
+
+        function deleteCustomer(id) {
+            customers = customers.filter(c => c.id !== id);
+            updateTable();
+            updateStats();
+        }
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
